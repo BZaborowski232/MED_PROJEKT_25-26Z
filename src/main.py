@@ -13,7 +13,7 @@ from evaluation import evaluate_model        # funkcja do oceny jakości klasyfi
 from sklearn.model_selection import train_test_split
 
 # Wczytywanie danych
-df = load_data("data/OnlineRetail.csv")
+df = load_data("../data/OnlineRetail.csv")
 # df teraz zawiera wszystkie transakcje w postaci DataFrame
 # każda linia = jedna pozycja na fakturze, kolumny: InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID, Country
 
