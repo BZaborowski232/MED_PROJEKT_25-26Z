@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
     Dokonuje segmentacji klientów metodą K-Means.
     Zabezpiecza przed wartościami odstającymi poprzez logarytmizację cech skośnych.
     Zwraca: (df z kolumną Segment, macierz X_scaled użyta do modelu)
-    """
+"""
 
 
 def segment_customers(df: pd.DataFrame, n_clusters: int = 3) -> tuple[pd.DataFrame, np.ndarray]:
@@ -23,7 +23,7 @@ def segment_customers(df: pd.DataFrame, n_clusters: int = 3) -> tuple[pd.DataFra
     X = data[features_col].copy()
 
     # --- 1. Logarytmizacja (Obsługa wartości odstających) ---
-    # Prowadzący wskazał na problem "klientów o bardzo wysokich wartościach".
+    # Obsługa problemu "klientów o bardzo wysokich wartościach".
     # Logarytmizacja (np. log(x+1)) niweluje wpływ skrajnych wartości (outliers).
     # Zamiast 100 vs 1 000 000, mamy np. 4.6 vs 13.8.
     

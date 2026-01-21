@@ -4,10 +4,12 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.metrics import confusion_matrix
 
-def plot_clusters_pca(X, clusters, title="Wizualizacja Segmentów (PCA)"):
-    """
+"""
     Rzutuje wielowymiarowe dane na 2D za pomocą PCA i rysuje klastry.
-    """
+"""
+
+def plot_clusters_pca(X, clusters, title="Wizualizacja Segmentów (PCA)"):
+
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X)
     
@@ -31,10 +33,12 @@ def plot_clusters_pca(X, clusters, title="Wizualizacja Segmentów (PCA)"):
     plt.grid(True, alpha=0.3)
     plt.show()
 
-def plot_feature_importance(model, feature_names):
-    """
+"""
     Rysuje wykres słupkowy ważności cech.
-    """
+"""
+
+def plot_feature_importance(model, feature_names):
+
     if not hasattr(model, "feature_importances_"):
         print("Model nie posiada atrybutu feature_importances_")
         return
@@ -61,10 +65,13 @@ def plot_feature_importance(model, feature_names):
     plt.yticks(fontsize=7) 
     plt.show()
 
-def plot_confusion_matrix_heatmap(y_true, y_pred, labels_map=None, title="Macierz Konfuzji"):
-    """
+
+"""
     Rysuje macierz konfuzji. Obsługuje zamianę numerów na nazwy (labels_map).
-    """
+"""
+
+def plot_confusion_matrix_heatmap(y_true, y_pred, labels_map=None, title="Macierz Konfuzji"):
+
     cm = confusion_matrix(y_true, y_pred)
     
     # Przygotowanie etykiet osi

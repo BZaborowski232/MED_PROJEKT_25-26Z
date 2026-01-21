@@ -30,13 +30,6 @@ def main():
     stats = customers_df.groupby("Segment")[["Recency", "Frequency", "Monetary", "TotalQuantity"]].mean()
     print(stats)
     
-    # MAPOWANIE NAZW SEGMENTÓW
-    # Przykład logiczny (do weryfikacji po uruchomieniu):
-    # Często K-means sortuje lub losuje, więc spójrz na output konsoli:
-    # - Segment z dużym Monetary/Freq -> "VIP / Lojalni"
-    # - Segment z dużym Recency -> "Uśpieni / Odchodzący"
-    # - Segment środkowy -> "Standardowi"
-    
     segment_map = {
         0: "Uśpieni / Odchodzący",     
         1: "VIP / Hurt",      
