@@ -26,3 +26,4 @@ Online Retail Dataset (Kaggle)
 ```bash
 pip install -r requirements.txt
 python src/main.py
+```
