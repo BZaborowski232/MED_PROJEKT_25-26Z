@@ -62,7 +62,7 @@ def plot_feature_importance(model, feature_names):
     
     plt.title("Wpływ cech na decyzję modelu (Feature Importance)")
     plt.xlabel("Waga cechy")
-    plt.yticks(fontsize=7) 
+    plt.yticks(fontsize=9) 
     plt.show()
 
 
