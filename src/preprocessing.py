@@ -5,21 +5,17 @@ import pandas as pd
     1. Usuwa rekordy bez CustomerID.
     2. Konwertuje daty.
     3. Oblicza całkowitą wartość pozycji (TotalPrice).
-    UWAGA: Nie usuwamy tutaj ujemnych Quantity (zwrotów), 
-    ponieważ są potrzebne do Feature Engineeringu.
 """
-
-
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
-    # Usunięcie brakujących ID klientów
-    df = df.dropna(subset=["CustomerID"])
+    # Usunięcie brakujących ID klientów i utworzenie niezależnej kopii
+    df = df.dropna(subset=["CustomerID"]).copy()
     
-    # Konwersja daty
+    # Konwersja daty (teraz bezpieczna, bo działamy na kopii)
     df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
     
-    # Obliczenie wartości pozycji (może być ujemna dla zwrotów)
+    # Obliczenie wartości pozycji
     df["TotalPrice"] = df["Quantity"] * df["UnitPrice"]
     
     return df
