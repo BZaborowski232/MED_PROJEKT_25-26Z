@@ -1,6 +1,6 @@
 # MED – Metody Eksploracji Danych
 
-## "Segmentacja klientów e-commerce na podstawie rozszerzonej analizy zachowań zakupowych i zwrotów"
+## "Segmentacja klientów e-commerce na podstawie analizy zachowań zakupowych klientów"
 
 #### Bartosz Zaborowski 319996
 
@@ -26,11 +26,11 @@ Każdy rekord w zbiorze reprezentuje pojedynczą pozycję na fakturze i zawiera 
 * `UnitPrice` - cena jednostkowa
 * `CustomerID` - identyfikator klienta
 
-Zbiór danych poddano czyszczeniu (usunięcie rekordów bez ID klienta), jednak **zachowano informacje o zwrotach** (ujemne wartości `Quantity`), które posłużyły do wygenerowania dodatkowych cech behawioralnych.
+Zbiór danych poddano czyszczeniu (usunięcie rekordów bez ID klienta), jednak zachowano informacje o zwrotach (ujemne wartości `Quantity`), które posłużyły do wygenerowania dodatkowych cech behawioralnych.
 
 ## 3. Opis algorytmów i metod
 
-### 3.1 Zaawansowana Inżynieria Cech (Feature Engineering)
+### 3.1 Rozbudowana Inżynieria Cech (Feature Engineering)
 
 Zamiast ograniczać się do klasycznego RFM, w ramach rozwoju projektu, zgodnie z uwagami otrzymanymi od prowadzącego, zaimplementowano wielowymiarowy wektor cech, aby jak najlepiej oddać specyfikę klienta. Poniżej zestawienie analizowanych atrybutów wraz z ich nazwami zmiennych w kodzie:
 
@@ -50,7 +50,7 @@ Zamiast ograniczać się do klasycznego RFM, w ramach rozwoju projektu, zgodnie 
 
 **Analiza Behawioralna i Czasowa:**
 * **Average Days Between Purchases** (zmienna: `AvgDaysBetweenPurchases`) - średni odstęp czasu (w dniach) między kolejnymi zakupami.
-* **Favorite Day** (zmienna: `FavoriteDay`) - dzień tygodnia, w którym klient najczęściej dokonuje zakupów (moda statystyczna).
+* **Favorite Day** (zmienna: `FavoriteDay`) - dzień tygodnia, w którym klient najczęściej dokonuje zakupów (dominanta).
 
 **Analiza Zwrotów:**
 * **Return Count** (zmienna: `ReturnCount`) - liczba transakcji zwrotu (faktur z ujemną ilością).
@@ -58,26 +58,26 @@ Zamiast ograniczać się do klasycznego RFM, w ramach rozwoju projektu, zgodnie 
 
 ### 3.2 Obsługa wartości odstających (Logarytmizacja)
 
-Ze względu na specyfikę danych e-commerce, zbiór charakteryzuje się rozkładem prawostronnie skośnym (right-skewed distribution). Oznacza to, że zdecydowana większość klientów dokonuje zakupów o niskiej wartości i częstotliwości, podczas gdy niewielka grupa klientów "hurtowych" osiąga wartości rzędu tysięcy lub milionów jednostek. Taka struktura danych stanowi problem dla algorytmu K-Means z dwóch powodów:
+Ze względu na specyfikę danych e-commerce, zbiór charakteryzuje się rozkładem prawostronnie skośnym (right-skewed distribution). Oznacza to, że zdecydowana większość klientów dokonuje zakupów o niskiej wartości i częstotliwości, podczas gdy niewielka grupa klientów "hurtowych" osiąga wartości rzędu tysięcy lub milionów. Taka struktura danych stanowi problem dla algorytmu K-Means z dwóch powodów:
 
-1. Pierwszym problemem jaki napotkałem była wrażliwość na wartości odstające (Outliers). Zastosowany przeze mnie algorytm K-Means opiera się na odległości euklidesowej. Klient, który wydał 1 000 000 zł, znajduje się geometrycznie tak daleko od reszty grupy (wydającej średnio 500 zł), że algorytm, próbując zminimalizować błąd, "poświęca" precyzję segmentacji mniejszych klientów, by dopasować centrum klastra do tego jednego odstającego przypadku. Jest to efekt niepożądany, który należało wyeliminować.
+1. Pierwszym problemem jaki napotkałem była wrażliwość na wartości odstające (Outliers). Zastosowany przeze mnie algorytm K-Means opiera się na odległości euklidesowej. Polega to na tym, że każdy klient jest traktowany jako punkt w wielowymiarowej przestrzeni, gdzie każda oś odpowiada jednej cesze. Algorytm przypisuje klienta do tego klastra (segmentu), którego centroid znajduje się w najmniejszej odległości euklidesowej od danego punktu. Oznacza to, że klienci o zbliżonych wartościach cech trafiają do tych samych segmentów, ponieważ geometrycznie leżą blisko siebie w przestrzeni cech. Klient, który wydał 1 000 000 zł, znajduje się geometrycznie tak daleko od reszty grupy (wydającej średnio 500 zł), że algorytm, próbując zminimalizować błąd, "poświęca" precyzję segmentacji mniejszych klientów, by dopasować centrum klastra do tego jednego odstającego przypadku. Jest to efekt niepożądany, który należało wyeliminować.
 
-2. Kolejną kwestią była kwestia skali liniowej vs. relatywnej. Dla algorytmu różnica między wydatkiem 10 zł a 100 zł (różnica = 90) jest pod kątem matematycznym niemal identyczna jak różnica między 10 000 zł a 10 100 zł (różnica = 100). Patrząc jednal przez pryzmat biznesowy, pierwszy przypadek to 10-krotny wzrost wartości klienta, a drugi to pomijalna różnica (1%). 
+2. Kolejną kwestią była kwestia skali liniowej vs. relatywnej. Dla algorytmu różnica między wydatkiem 10 zł a 100 zł (różnica = 90) jest pod kątem matematycznym niemal identyczna jak różnica między 10 000 zł a 10 100 zł (różnica = 100). Patrząc jednal przez pryzmat biznesowy, pierwszy przypadek to 10-krotny wzrost wartości klienta, a drugi to pomijalna różnica (~1%). 
 
-Aby wyeliminować te dwie problematyczne kwestie zastosowano przy użyciu biblioteki NumPy transformację logarytmiczną funkcją `np.log1p` (czyli zwyczajnie ln(x+1)), dla cech: Monetary, Recency oraz TotalQuantity. Zastosowanie akurat ln(1 + x), zamiast klasycznej funkcji logarytmu wynika z faktu, że w danych występują wartości zerowe, na przykład dla cech takich jak Recency (klient dokonujący zakupu w bieżącym dniu) lub ReturnCount (brak zwrotów). Logarytm z zera jest niezdefiniowany i prowadzi do błędów numerycznych, natomiast funkcja `np.log1p` pozwala bezpiecznie przekształcić takie wartości, przypisując im wynik równy zero. Dzięki temu transformacja jest stabilna numerycznie i może być stosowana bez konieczności dodatkowego filtrowania danych.
+Aby wyeliminować te dwie problematyczne kwestie zaiplementowano przy wykorzystaniu biblioteki NumPy, transformację logarytmiczną funkcją `np.log1p` (czyli zwyczajnie ln(x+1)), dla cech: Monetary, Recency oraz TotalQuantity. Zastosowanie akurat ln(1 + x), zamiast klasycznej funkcji logarytmu wynika z faktu, że w danych występują wartości zerowe, na przykład dla cech takich jak Recency (klient dokonujący zakupu w bieżącym dniu) lub ReturnCount (brak zwrotów). Logarytm z zera jest niezdefiniowany i prowadzi do błędów numerycznych, natomiast funkcja `np.log1p` pozwala bezpiecznie przekształcić takie wartości, przypisując im wynik równy zero. Dzięki temu transformacja jest stabilna numerycznie i może być stosowana bez konieczności dodatkowego filtrowania danych.
 
-Dzięki zastosowaniu takiego rozwiązania mogłem ograniczyć wpływ wartości skrajnych co przełożyło się na jakość mojej analizy. Logarytm naturalny powoduje kompresję skali danych. Bardzo duże wartości, potencjalnie zaburzające analizę, zostają „ściśnięte”, natomiast mniejsze pozostają względnie bardziej rozciągnięte. Dzięki temu ogromne różnice kwotowe występujące u klientów hurtowych zostają sprowadzone do skali porównywalnej z klientami detalicznymi, co zapobiega dominowaniu pojedynczych obserwacji. Dodatkową zaletą tej transformacji jest to, że rozkład danych staje się bliższy rozkładowi normalnemu, a jest to szczególnie istotne w przypadku algorytmów opartych na odległości i wariancji, takich jak wykorzystywany przeze mnie K-means, które są wrażliwe na skośne rozkłady oraz obecność wartości odstających.
+Dzięki zastosowaniu takiego rozwiązania mogłem ograniczyć wpływ wartości skrajnych co przełożyło się pozytywnie na jakość mojej analizy. Logarytm naturalny powoduje kompresję skali danych. Bardzo duże wartości, potencjalnie zaburzające analizę, zostają „ściśnięte”, natomiast mniejsze pozostają względnie bardziej rozciągnięte. Dzięki temu ogromne różnice kwotowe występujące u klientów hurtowych zostają sprowadzone do skali porównywalnej z klientami detalicznymi, co zapobiega dominowaniu pojedynczych obserwacji. Dodatkową zaletą tej transformacji jest to, że rozkład danych staje się bliższy rozkładowi normalnemu, a jest to szczególnie istotne w przypadku algorytmów opartych na odległości i wariancji, takich jak wykorzystywany przeze mnie K-means, które są wrażliwe na skośne rozkłady oraz obecność wartości odstających.
 
 ### 3.3 Wykorzystywane algorytmy
 
 * **k-means:** Użyty do wyznaczenia 3 naturalnych segmentów klientów na podstawie znormalizowanych cech.
 * **Drzewo decyzyjne:** Model budujący reguły if-then, pozwalający na interpretację, które cechy (np. suma wydatków czy liczba zwrotów) decydują o przypisaniu do segmentu.
-* **Naiwny klasyfikator Bayesa:** Model probabilistyczny, użyty jako punkt odniesienia (baseline).
+* **Naiwny klasyfikator Bayesa:** Model probabilistyczny, użyty jako punkt odniesienia.
 
 ## 4. Wybrane technologie
 
 Projekt został zrealizowany w języku Python z wykorzystaniem bibliotek:
-* **pandas / numpy** – zaawansowane przetwarzanie danych i inżynieria cech.
+* **pandas / numpy** – przetwarzanie danych i inżynieria cech.
 * **scikit-learn** – implementacja algorytmów ML, pipeline'ów transformacji oraz metryk oceny.
 * **seaborn / matplotlib** – wizualizacja macierzy konfuzji, ważności cech oraz rzutowania PCA.
 
@@ -249,17 +249,21 @@ def segment_customers(df: pd.DataFrame, n_clusters: int = 3) -> tuple[pd.DataFra
 
 W projekcie zastosowano dwa klasyczne algorytmy uczenia nadzorowanego: drzewo decyzyjne oraz naiwny klasyfikator Bayesa. Oba modele zostały zaimplementowane w postaci osobnych klas, co zapewnia czytelność kodu, spójny interfejs oraz możliwość łatwej rozbudowy lub wymiany algorytmów w przyszłości.
 
-Klasyfikatory uczone są na danych wejściowych w postaci cech RFM (Recency, Frequency, Monetary), natomiast zmienną docelową są etykiety segmentów klientów wygenerowane wcześniej przez algorytm k-means. W ten sposób problem klasyfikacji polega na nauczeniu modeli odtwarzania segmentacji klientów na podstawie ich zachowań zakupowych.
+Po rozwinięciu projektu klasyfikatory nie ograniczają się już tylko do podstawowych cech RFM. Modele trenowane są na pełnym, 12-wymiarowym wektorze cech, obejmującym również statystyki zwrotów, średnie wartości koszyka oraz wskaźniki czasowe (opisane w sekcji 3.1). Dane wejściowe poddawane są wcześniej logarytmizacji i standaryzacji, aby zapewnić optymalne warunki pracy dla algorytmów wrażliwych na skalę.
 
-Drzewo decyzyjne wykorzystuje mechanizm hierarchicznych reguł decyzyjnych, które dzielą przestrzeń cech na coraz bardziej jednorodne obszary. Model ten dobrze radzi sobie z danymi tablicowymi, nie wymaga skalowania cech oraz umożliwia nieliniowe rozdzielenie klas. W projekcie zastosowano domyślną konfigurację drzewa decyzyjnego z ustalonym ziarnem losowości w celu zapewnienia powtarzalności wyników.
+Zmienną docelową są etykiety segmentów ("VIP", "Standardowi", "Uśpieni") wygenerowane wcześniej przez algorytm k-means. W ten sposób problem klasyfikacji polega na nauczeniu modeli "rozumienia" logiki segmentacji i przypisywania nowych klientów do grup na podstawie ich złożonego profilu behawioralnego.
 
-Naiwny klasyfikator Bayesa opiera się na probabilistycznym podejściu i założeniu niezależności cech. W implementacji wykorzystano wariant Gaussa, odpowiedni dla cech ciągłych, takich jak wartości RFM. Model ten charakteryzuje się bardzo szybkim czasem uczenia oraz prostotą obliczeniową, jednak jego skuteczność może być ograniczona w przypadku silnej zależności pomiędzy cechami.
+**Charakterystyka modeli:**
 
-Oba klasyfikatory udostępniają jednolity interfejs obejmujący proces trenowania modelu oraz generowania predykcji, co umożliwia ich bezpośrednie porównanie na tym samym zbiorze testowym. Takie podejście pozwala ocenić, w jakim stopniu różne algorytmy są w stanie odtworzyć segmentację klientów uzyskaną metodą nienadzorowaną.
+* **Drzewo decyzyjne** - Wykorzystuje mechanizm hierarchicznych reguł decyzyjnych. W zaktualizowanej wersji projektu model ten pełni kluczową rolę w interpretacji wyników, bo dzięki analizie ważności cech (Feature Importance) pozwala wskazać, które z nowych atrybutów (np. `TotalQuantity` czy `ReturnCount`) są decydujące dla przypisania klienta do segmentu VIP.
+
+* **Naiwny klasyfikator Bayesa** - Opiera się na probabilistycznym podejściu i założeniu niezależności cech. W implementacji wykorzystano wariant Gaussa. Choć założenie o niezależności cech w e-commerce jest uproszczeniem (np. `Monetary` jest skorelowane z `Quantity`), to dzięki wcześniejszej transformacji logarytmicznej, która zbliżyła rozkłady cech do normalnych, model ten osiąga bardzo wysoką skuteczność i stanowi solidny punkt odniesienia.
+
+Oba klasyfikatory udostępniają jednolity interfejs (`train`, `predict`), co umożliwia ich bezpośrednie porównanie na tym samym zbiorze testowym.
 
 ### 5.7 Ewaluacja modeli – `evaluation.py`
 
-Moduł `evaluation.py` odpowiada za ocenę jakości klasyfikacji. Zaktualizowano metody wizualizacji w visualization.py o wykresy PCA (rzutowanie wielowymiarowe na 2D) oraz Feature Importance dla drzewa decyzyjnego, aby zbadać wpływ nowych cech na model.
+Moduł `evaluation.py` odpowiada za ocenę jakości klasyfikacji. 
 
 ```python
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
@@ -268,31 +272,31 @@ def evaluate_model(y_true, y_pred, model_name="Model"):
 
     print(f"\n--- Ocena modelu: {model_name} ---")
     
-    # Podstawowa celność
     acc = accuracy_score(y_true, y_pred)
     print(f"Accuracy: {acc:.4f}")
     
-    # Raport tekstowy (Precision, Recall, F1)
     print("\nClassification Report:")
     print(classification_report(y_true, y_pred))
     
-    # Macierz tekstowa zeby mov tez go zobaczyc w konsoli
     print("Confusion Matrix (text):")
     print(confusion_matrix(y_true, y_pred))
 ```
 
+Dodatkowo powstał nowy plik `visualization.py` odpowiedzialny za generowanie wizualizacji, pozwalające lepiej zobrazować wyniki oraz pokazać zasadę działania samych algorytmów. Wizualizacje zostały rozszerzone o wykres PCA (rzutowanie wielowymiarowe na 2D) oraz Feature Importance dla drzewa decyzyjnego, aby zbadać wpływ nowych cech na model.
+
+
 ### 5.8 Plik główny – `main.py`
 
-Plik main.py integruje wszystkie opisane wcześniej moduły, steruje przepływem danych i realizuje pełny przebieg eksperymentu. Jego struktura została rozbudowana o etapy analizy i wizualizacji:
+Plik `main.py` integruje wszystkie opisane wcześniej moduły, steruje przepływem danych i realizuje pełny przebieg eksperymentu. Jego struktura została rozbudowana o etapy analizy i wizualizacji:
 
 ```python
-# 1. Wczytanie danych (Load data)
-# 2. Preprocessing (oczyszczenie + wyliczenie TotalPrice)
-# 3. Rozbudowana inżynieria cech (RFM + statystyki + zwroty)
-# 4. Segmentacja (logarytmizacja + K-Means + analiza średnich w grupach)
+# 1. Wczytanie danych
+# 2. Preprocessing
+# 3. Rozbudowana inżynieria cech
+# 4. Segmentacja
 # 5. Podział na zbiór treningowy i testowy (Train-test split)
-# 6. Klasyfikacja (uczenie modeli Decision Tree oraz Naive Bayes)
-# 7. Ewaluacja i Wizualizacja (raporty, macierze konfuzji, Feature Importance, PCA)
+# 6. Klasyfikacja
+# 7. Ewaluacja i Wizualizacja
 ```
 Plik ten pełni również rolę orkiestratora, który mapuje numeryczne identyfikatory segmentów na biznesowe nazwy ("VIP", "Standardowi", "Uśpieni") przed wygenerowaniem końcowych raportów.
 
@@ -308,9 +312,11 @@ Po rozszerzeniu zbioru cech o atrybuty behawioralne i statystyki zwrotów, uzysk
 
 ### 6.1 Analiza wizualna segmentacji (K-Means i PCA)
 
-W celu weryfikacji jakości podziału dokonanego przez algorytm k-means, zrzutowano wielowymiarową przestrzeń cech (12 atrybutów) na przestrzeń dwuwymiarową za pomocą analizy głównych składowych (PCA).
+W celu weryfikacji jakości podziału dokonanego przez algorytm k-means, zrzutowano wielowymiarową przestrzeń cech na przestrzeń dwuwymiarową za pomocą analizy głównych składowych (PCA).
 
 ![Wizualizacja PCA](Visualizations/PCA_K-Means.png)
+
+Osie wykresu, oznaczone jako PCA1 (oś pozioma) i PCA2 (oś pionowa), wyjaśniają odpowiednio 42.87% oraz 14.23% wariancji. Oznacza to, że rzut ten zachowuje ponad 57% kluczowych informacji o różnicach między klientami, redukując 12-wymiarową przestrzeń cech do czytelnego obrazu 2D.
 
 Jak możemy zauważyć na wykresie utworzone klastry są wyraźnie odseparowane, co świadczy o tym, że dobrane cechy (w tym logarytmizowane wartości finansowe) skutecznie różnicują klientów. Spójność jest zachowana, punkty wewnątrz segmentów (szczególnie "Uśpieni" i "Standardowi") tworzą zwarte skupiska. Widzimy, że segment VIP jest najbardziej rozproszony, co wynika z faktu, że w tej grupie zakresy kwotowe są ogromne (od kilkunastu tysięcy do milionów), podczas gdy segmenty detaliczne są bardziej jednorodne.
 
@@ -318,13 +324,34 @@ Jak możemy zauważyć na wykresie utworzone klastry są wyraźnie odseparowane,
 
 Drzewo decyzyjne okazało się najskuteczniejszym modelem, osiągając dokładność na poziomie 93.7%.
 
-![Macierz konfuzji dla Decision Tree](Visualizations/Matrix_Decision_Tree.png)
+```
+--- Decision Tree ---
+
+--- Ocena modelu: Decision Tree ---
+Accuracy: 0.9370
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.97      0.96      0.96       503
+           1       0.86      0.87      0.86       159
+           2       0.93      0.94      0.94       640
+
+    accuracy                           0.94      1302
+   macro avg       0.92      0.92      0.92      1302
+weighted avg       0.94      0.94      0.94      1302
+```
 
 Model osiaga wysoka precyzję dla skrajnych grup. Bardzo dobrze identyfikuje klientów "Uśpionych" (Precision: 0.97, Recall: 0.96). Oznacza to, że reguły oparte na Recency są bardzo silne.
 
 Dla Segmentu VIP osiągnięto F1-score na poziomie 0.86. Jest to wynik bardzo dobry, biorąc pod uwagę niewielką liczebność tej klasy (zaledwie ~12% zbioru testowego). Błędy wynikają prawdopodobnie głównie z granicznych przypadków między "bardzo dobrym klientem standardowym" a "małym klientem VIP".
 
-Analiza struktury drzewa pozwala zrozumieć, jakie czynniki decydują o przypisaniu do segmentu dlatego wygenerowany został wykres ważności cech (Feature Importance).
+Poniżej przedstawiono wygenerowaną macierz konfuzji:
+![Macierz konfuzji dla Decision Tree](Visualizations/Matrix_Decision_Tree.png)
+
+Analiza macierzy konfuzji wskazuje na wysoką stabilność modelu, co potwierdzają dominujące wartości na przekątnej (482, 138, 600), oznaczające poprawne predykcje. Szczególnie istotny biznesowo jest fakt, że żaden klient z segmentu VIP (wiersz środkowy) nie został błędnie zaklasyfikowany jako 'Uśpiony' (zero w pierwszej kolumnie), co minimalizuje ryzyko zaniedbania kluczowych nabywców. Główne błędy koncentrują się na granicy między segmentami VIP a Standardowymi (łącznie 44 pomyłki w obu kierunkach), co jest zrozumiałe ze względu na płynną granicę między 'bardzo dobrym klientem standardowym' a 'początkującym VIP-em'.
+
+Dodatkowo analiza struktury drzewa pozwala zrozumieć, jakie czynniki decydują o przypisaniu do segmentu dlatego wygenerowany został wykres ważności cech (Feature Importance).
 
 ![Feature Importnce Decision Tree](Visualizations/Verdical_BarChart_Decision_Tree.png)
 
@@ -334,13 +361,34 @@ Z wykresu wynika, że kluczowymi atrybutami decyzyjnymi nie jest tylko suma wyda
 
 Model Naive Bayes osiągnął nieznacznie niższy, lecz wciąż bardzo wysoki wynik dokładności: 92.3%.
 
-![Macierz konfuzji dla Naive Bayes](Visualizations/Matrix_Naive_Bayes.png)
+```
+--- Naive Bayes ---
+
+--- Ocena modelu: Naive Bayes ---
+Accuracy: 0.9232
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.90      0.96      0.93       503
+           1       0.86      0.96      0.91       159
+           2       0.96      0.88      0.92       640
+
+    accuracy                           0.92      1302
+   macro avg       0.91      0.94      0.92      1302
+weighted avg       0.93      0.92      0.92      1302
+```
 
 Jak możemy zauważyć Bayes charakteryzuje się bardzo wysoką czułością (Recall: 0.96) dla segmentu VIP. Wykrył on 96% wszystkich najważniejszych klientów, co w zastosowaniach marketingowych może być ważniejsze niż precyzja (lepiej omyłkowo dać rabat klientowi standardowemu, niż pominąć VIP-a). Nieznacznie gorszy ogólny wynik względem drzewa wynika prawdopodobnie z założenia niezależności cech w algorytmie Bayesa (podczas gdy w e-commerce cechy takie jak Monetary i Quantity są silnie skorelowane). Mimo to, wynik powyżej 92% dowodzi, że po zastosowaniu transformacji logarytmicznej, rozkłady cech są wystarczająco zbliżone do normalnych, by działał efektywnie.
 
+Poniżej przedstawiono macierz konfuzji:
+![Macierz konfuzji dla Naive Bayes](Visualizations/Matrix_Naive_Bayes.png)
+
+Macierz dla modelu Naive Bayes ujawnia bardzo dużą czułość w wykrywaniu segmentu VIP (środkowy wiersz), gdzie model poprawnie zidentyfikował aż 153 z 159, myląc ich jedynie z klientami Standardowymi. W przeciwieństwie do drzewa decyzyjnego, algorytm ten częściej popełnia błędy przy klasyfikacji klientów Standardowych jako Uśpionych (52 przypadki w dolnym lewym rogu), co może wynikać z probabilistycznej natury modelu przy mniej wyraźnych granicach między tymi grupami. Mimo to, zerowa wartość w komórce [1,0] potwierdza, że model jest bezpieczny biznesowo, ponieważ żaden kluczowy klient VIP nie został błędnie oznaczony jako nieaktywny.
+
 ## 7. Wnioski
 
-W wyniku proejktu udało się stworszyć skuteczny pipeline’u analityczny, który z wysoką precyzją segmentuje klientów sklepu internetowego. Przeprowadzone eksperymenty prowadzą do następujących wniosków:
+W wyniku proejktu udało się stworzyć skuteczny pipeline’u analityczny, który z wysoką precyzją segmentuje klientów sklepu internetowego. Przeprowadzone eksperymenty prowadzą do następujących wniosków:
 
 1. **Kluczowa rola Inżynierii Cech (Feature Engineering):**
 Przejście z podstawowego modelu RFM (3 cechy) na rozszerzony wektor atrybutów okazało się decydujące dla jakości analizy. Uwzględnienie statystyk zwrotów oraz odstępów czasowych między zakupami pozwoliło na wyodrębnienie bardziej realistycznych profili klientów. Wykres ważności cech (Feature Importance) potwierdził, że atrybuty takie jak `TotalQuantity` czy `AvgDaysBetweenPurchases` mają kluczowy wpływ na decyzje modelu.
@@ -349,7 +397,7 @@ Przejście z podstawowego modelu RFM (3 cechy) na rozszerzony wektor atrybutów 
 Zastosowanie transformacji logarytmicznej (`np.log1p`) zamiast sztywnej dyskretyzacji okazało się optymalnym rozwiązaniem dla danych e-commerce o rozkładzie skośnym. Pozwoliło to na "spłaszczenie" wpływu klientów hurtowych na algorytm k-means, zachowując jednocześnie ciągłość i precyzję danych liczbowych. Dzięki temu uniknięto sztucznego szatkowania danych na przedziały.
 
 3. **Wysoka jakość segmentacji:**
-Zidentyfikowane grupy klientów (**VIP, Standardowi, Uśpieni**) są spójne biznesowo i wyraźnie odseparowane w przestrzeni wielowymiarowej (co potwierdza wizualizacja PCA). Każdy segment wymaga innej strategii marketingowej, co czyni ten model użytecznym narzędziem biznesowym.
+Zidentyfikowane grupy klientów (VIP, Standardowi, Uśpieni) są spójne biznesowo i wyraźnie odseparowane w przestrzeni wielowymiarowej (co potwierdza wizualizacja PCA). Każdy segment wymaga innej strategii marketingowej, co czyni ten model użytecznym narzędziem biznesowym.
 
 4. **Przewaga Drzewa Decyzyjnego:**
 Model Drzewa Decyzyjnego osiągnął najwyższą skuteczność (Accuracy: 93.7%). Jego niewielka przewaga nad Naiwnym Klasyfikatorem Bayesa (Accuracy: 92.3%) wynika z faktu, że drzewo lepiej radzi sobie ze skorelowanymi cechami (np. `Monetary` jest zależne od `Quantity`) oraz potrafi tworzyć nieliniowe reguły decyzyjne, które idealnie odwzorowują granice między segmentami.
