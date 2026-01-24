@@ -11,7 +11,7 @@ import pandas as pd
 
 def main():
     print(">>> KROK 1: Wczytywanie danych")
-    df = load_data("../data/OnlineRetail.csv")
+    df = load_data("data/OnlineRetail.csv")
     print(f"Wczytano {len(df)} wierszy.")
 
     print("\n>>> KROK 2: Preprocessing")

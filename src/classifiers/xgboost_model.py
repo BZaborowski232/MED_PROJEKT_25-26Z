@@ -1,6 +1,8 @@
 import xgboost as xgb
 import matplotlib.pyplot as plt
+import os
 from sklearn.metrics import accuracy_score
+
 
 class XGBoostModel:
     def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42):
@@ -9,7 +11,6 @@ class XGBoostModel:
             learning_rate=learning_rate,
             max_depth=max_depth,
             random_state=random_state,
-            use_label_encoder=False,
             eval_metric='mlogloss',
             n_jobs=-1   # -1 to użycie wszystkich dostępnych rdzeni CPU, jakbym ustawił liczbę to ta konkretna liczba rdzeni bedzie dzialac
         )
@@ -21,10 +22,15 @@ class XGBoostModel:
         return self.model.predict(X_test)
 
     def get_feature_importance(self):
-        # XGBoost ma wbudowaną metodę do plotowania
         plt.figure(figsize=(10, 8))
-        xgb.plot_importance(self.model, max_num_features=15)
+        xgb.plot_importance(self.model, max_num_features=15, height=0.5)
         plt.title("Ważność cech - XGBoost")
         plt.tight_layout()
-        plt.savefig("Visualizations/Feature_Importance_XGBoost.png")
-        print("Zapisano wykres ważności cech dla XGBoost.")
+        
+        # Zapis do MGR z tworzeniem folderu
+        save_path = "Visualizations/MGR/Feature_Importance_XGBoost.png"
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
+        plt.savefig(save_path)
+        plt.close() # Zamknięcie figury (chociaż xgb.plot może tworzyć własną, to close() jest bezpieczne)
+        print(f"Zapisano wykres ważności cech: {save_path}")

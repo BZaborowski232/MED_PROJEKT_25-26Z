@@ -84,7 +84,7 @@ def suggest_dbscan_eps(X_scaled, k=4):
     plt.xlabel("Punkty posortowane wg odległości")
     plt.ylabel(f"Odległość do {k}-tego sąsiada")
     plt.grid(True)
-    plt.savefig("Visualizations/DBSCAN_Eps_Estimation.png")
+    plt.savefig("Visualizations/MGR/DBSCAN_Eps_Estimation.png")
     print("Wykres pomocniczy dla DBSCAN zapisano w Visualizations/")
 
 

@@ -1,3 +1,7 @@
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
@@ -17,9 +21,6 @@ class RandomForestModel:
         return self.model.predict(X_test)
     
     def get_feature_importance(self, feature_names):
-        import pandas as pd
-        import matplotlib.pyplot as plt
-        import seaborn as sns
         
         importances = self.model.feature_importances_
         feature_imp = pd.Series(importances, index=feature_names).sort_values(ascending=False)
@@ -27,8 +28,14 @@ class RandomForestModel:
         plt.figure(figsize=(10, 6))
         sns.barplot(x=feature_imp, y=feature_imp.index)
         plt.title("Ważność cech - Random Forest")
+        plt.xlabel("Waga")
+        plt.ylabel("Cechy")
+        
+        save_path = "Visualizations/MGR/Feature_Importance_RF.png"
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
         plt.tight_layout()
-        plt.savefig("Visualizations/Feature_Importance_RF.png")
+        plt.savefig("Visualizations/MGR/Feature_Importance_RF.png")
         print("Zapisano wykres ważności cech dla Random Forest.")
         
         return feature_imp

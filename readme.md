@@ -27,3 +27,4 @@ Online Retail Dataset (Kaggle)
 pip install -r requirements.txt
 python src/main.py
 ```
+Uruchamiamy pożądanego maina z katalogu głównego projektu
