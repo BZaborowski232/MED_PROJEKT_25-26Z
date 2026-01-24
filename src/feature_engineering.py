@@ -2,17 +2,16 @@ import pandas as pd
 import datetime as dt
 import numpy as np
 
-"""
-    Tworzy rozszerzony zestaw cech dla każdego klienta:
-    - RFM (Recency, Frequency, Monetary)
-    - Statystyki koszyka (Min, Max, Mean)
-    - Statystyki produktowe (Unikalne produkty, Ilość sztuk)
-    - Zachowania czasowe (Ulubiony dzień, Średni czas między zakupami)
-    - Zwroty
-"""
-
-
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
+
+    """
+        Tworzy rozszerzony zestaw cech dla każdego klienta:
+        - RFM (Recency, Frequency, Monetary)
+        - Statystyki koszyka (Min, Max, Mean)
+        - Statystyki produktowe (Unikalne produkty, Ilość sztuk)
+        - Zachowania czasowe (Ulubiony dzień, Średni czas między zakupami)
+        - Zwroty
+    """
 
     # Data odniesienia (dzień po ostatniej transakcji w zbiorze)
     NOW = dt.datetime(2011, 12, 10)

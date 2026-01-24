@@ -1,17 +1,19 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-
-"""
-    Dokonuje segmentacji klientów metodą K-Means.
-    Zabezpiecza przed wartościami odstającymi poprzez logarytmizację cech skośnych.
-    Zwraca: (df z kolumną Segment, macierz X_scaled użyta do modelu)
-"""
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.neighbors import NearestNeighbors
+import matplotlib.pyplot as plt
 
 
 def segment_customers(df: pd.DataFrame, n_clusters: int = 3) -> tuple[pd.DataFrame, np.ndarray]:
     
+    """
+        Dokonuje segmentacji klientów metodą K-Means.
+        Zabezpiecza przed wartościami odstającymi poprzez logarytmizację cech skośnych.
+        Zwraca: (df z kolumną Segment, macierz X_scaled użyta do modelu)
+    """
+
     # Kopia, aby nie modyfikować oryginału w funkcji
     data = df.copy()
 
@@ -59,3 +61,51 @@ def segment_customers(df: pd.DataFrame, n_clusters: int = 3) -> tuple[pd.DataFra
 
     # Zwracamy df (z segmentami) oraz X_scaled (gotowe wejście dla klasyfikatorów)
     return df, X_scaled
+
+
+
+    ## --- DBSCAN ---
+
+def suggest_dbscan_eps(X_scaled, k=4):
+ 
+    """
+        Pomocnicza funkcja do pracy magisterskiej: Rysuje wykres k-distance,
+        aby znaleźć optymalne 'eps' metodą łokcia.
+    """
+
+    neighbors = NearestNeighbors(n_neighbors=k)
+    neighbors_fit = neighbors.fit(X_scaled)
+    distances, indices = neighbors_fit.kneighbors(X_scaled)
+    distances = np.sort(distances[:, k-1], axis=0)
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(distances)
+    plt.title("Wykres k-distance (Metoda łokcia dla DBSCAN)")
+    plt.xlabel("Punkty posortowane wg odległości")
+    plt.ylabel(f"Odległość do {k}-tego sąsiada")
+    plt.grid(True)
+    plt.savefig("Visualizations/DBSCAN_Eps_Estimation.png")
+    print("Wykres pomocniczy dla DBSCAN zapisano w Visualizations/")
+
+
+def segment_customers_dbscan(df: pd.DataFrame, X_scaled, eps=0.5, min_samples=5):
+
+    """
+        Implementacja DBSCAN.
+        Zwraca DataFrame z kolumną 'Segment_DBSCAN'.
+        Uwaga: DBSCAN generuje etykietę -1 dla szumu (outliers).
+    """
+
+    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+    labels = dbscan.fit_predict(X_scaled)
+    
+    df["Segment_DBSCAN"] = labels
+    
+    # Informacja badawcza
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise_ = list(labels).count(-1)
+    
+    print(f"\n[DBSCAN] Szacowana liczba klastrów: {n_clusters_}")
+    print(f"[DBSCAN] Liczba punktów szumu (outliers): {n_noise_}")
+    
+    return df

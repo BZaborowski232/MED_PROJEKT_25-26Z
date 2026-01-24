@@ -1,11 +1,11 @@
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
-"""
-    Wyświetla tekstowy raport klasyfikacji.
-    UWAGA: Nie generuje już wykresu, aby uniknąć duplikacji w main.py.
-"""
-
 def evaluate_model(y_true, y_pred, model_name="Model"):
+    
+    """
+        Wyświetla tekstowy raport klasyfikacji.
+        Nie generuje wykresu, aby uniknąć duplikacji w main.py.
+    """
 
     print(f"\n--- Ocena modelu: {model_name} ---")
     
