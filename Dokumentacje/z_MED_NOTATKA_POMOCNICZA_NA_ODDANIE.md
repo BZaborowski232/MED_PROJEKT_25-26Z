@@ -228,3 +228,8 @@ Cechy takie jak TotalQuantity (całkowita liczba produktów), Monetary (wydana k
     * To jest Twój algorytm **K-Means** (Segmentacja).
     * Na początku nie wiedziałeś, kto jest VIP-em. Algorytm sam to odkrył, analizując, kto jest podobny do kogo.
     * Do tej grupy należy też **PCA** (redukcja wymiarów), które samo znalazło najważniejsze osie wariancji.
+
+
+
+
+    KOLEJNE SPOTKANIE śRODA, DO WTORKU WYSLAC PACZKE Z RZECZAMI NA ZALIXZENIE OBYDWU PRACOWNI  - od 9:00 do 14:30 max --> stworzyc spotkanie w ms teams zarezerwowac godzine na spotkanie

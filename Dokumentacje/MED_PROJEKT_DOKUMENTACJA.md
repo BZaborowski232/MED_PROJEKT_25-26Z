@@ -314,7 +314,7 @@ Po rozszerzeniu zbioru cech o atrybuty behawioralne i statystyki zwrotów, uzysk
 
 W celu weryfikacji jakości podziału dokonanego przez algorytm k-means, zrzutowano wielowymiarową przestrzeń cech na przestrzeń dwuwymiarową za pomocą analizy głównych składowych (PCA).
 
-![Wizualizacja PCA](Visualizations/PCA_K-Means.png)
+![Wizualizacja PCA](../Visualizations/PCA_K-Means.png)
 
 Osie wykresu, oznaczone jako PCA1 (oś pozioma) i PCA2 (oś pionowa), wyjaśniają odpowiednio 42.87% oraz 14.23% wariancji. Oznacza to, że rzut ten zachowuje ponad 57% kluczowych informacji o różnicach między klientami, redukując 12-wymiarową przestrzeń cech do czytelnego obrazu 2D.
 
@@ -347,13 +347,13 @@ Model osiaga wysoka precyzję dla skrajnych grup. Bardzo dobrze identyfikuje kli
 Dla Segmentu VIP osiągnięto F1-score na poziomie 0.86. Jest to wynik bardzo dobry, biorąc pod uwagę niewielką liczebność tej klasy (zaledwie ~12% zbioru testowego). Błędy wynikają prawdopodobnie głównie z granicznych przypadków między "bardzo dobrym klientem standardowym" a "małym klientem VIP".
 
 Poniżej przedstawiono wygenerowaną macierz konfuzji:
-![Macierz konfuzji dla Decision Tree](Visualizations/Matrix_Decision_Tree.png)
+![Macierz konfuzji dla Decision Tree](../Visualizations/Matrix_Decision_Tree.png)
 
 Analiza macierzy konfuzji wskazuje na wysoką stabilność modelu, co potwierdzają dominujące wartości na przekątnej (482, 138, 600), oznaczające poprawne predykcje. Szczególnie istotny biznesowo jest fakt, że żaden klient z segmentu VIP (wiersz środkowy) nie został błędnie zaklasyfikowany jako 'Uśpiony' (zero w pierwszej kolumnie), co minimalizuje ryzyko zaniedbania kluczowych nabywców. Główne błędy koncentrują się na granicy między segmentami VIP a Standardowymi (łącznie 44 pomyłki w obu kierunkach), co jest zrozumiałe ze względu na płynną granicę między 'bardzo dobrym klientem standardowym' a 'początkującym VIP-em'.
 
 Dodatkowo analiza struktury drzewa pozwala zrozumieć, jakie czynniki decydują o przypisaniu do segmentu dlatego wygenerowany został wykres ważności cech (Feature Importance).
 
-![Feature Importnce Decision Tree](Visualizations/Verdical_BarChart_Decision_Tree.png)
+![Feature Importnce Decision Tree](../Visualizations/Verdical_BarChart_Decision_Tree.png)
 
 Z wykresu wynika, że kluczowymi atrybutami decyzyjnymi nie jest tylko suma wydatków (Monetary), ale również całkowita liczba zakupionych produktów (TotalQuantity) oraz częstotliwość zakupów (Frequency / AvgDaysBetweenPurchases). Potwierdza to zasadność rozszerzenia inżynierii cech bo model korzysta teraz z wielowymiarowego obrazu klienta, a nie tylko z prostej wartości sprzedaży.
 
@@ -382,7 +382,7 @@ weighted avg       0.93      0.92      0.92      1302
 Jak możemy zauważyć Bayes charakteryzuje się bardzo wysoką czułością (Recall: 0.96) dla segmentu VIP. Wykrył on 96% wszystkich najważniejszych klientów, co w zastosowaniach marketingowych może być ważniejsze niż precyzja (lepiej omyłkowo dać rabat klientowi standardowemu, niż pominąć VIP-a). Nieznacznie gorszy ogólny wynik względem drzewa wynika prawdopodobnie z założenia niezależności cech w algorytmie Bayesa (podczas gdy w e-commerce cechy takie jak Monetary i Quantity są silnie skorelowane). Mimo to, wynik powyżej 92% dowodzi, że po zastosowaniu transformacji logarytmicznej, rozkłady cech są wystarczająco zbliżone do normalnych, by działał efektywnie.
 
 Poniżej przedstawiono macierz konfuzji:
-![Macierz konfuzji dla Naive Bayes](Visualizations/Matrix_Naive_Bayes.png)
+![Macierz konfuzji dla Naive Bayes](../Visualizations/Matrix_Naive_Bayes.png)
 
 Macierz dla modelu Naive Bayes ujawnia bardzo dużą czułość w wykrywaniu segmentu VIP (środkowy wiersz), gdzie model poprawnie zidentyfikował aż 153 z 159, myląc ich jedynie z klientami Standardowymi. W przeciwieństwie do drzewa decyzyjnego, algorytm ten częściej popełnia błędy przy klasyfikacji klientów Standardowych jako Uśpionych (52 przypadki w dolnym lewym rogu), co może wynikać z probabilistycznej natury modelu przy mniej wyraźnych granicach między tymi grupami. Mimo to, zerowa wartość w komórce [1,0] potwierdza, że model jest bezpieczny biznesowo, ponieważ żaden kluczowy klient VIP nie został błędnie oznaczony jako nieaktywny.
 
