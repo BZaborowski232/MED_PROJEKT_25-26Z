@@ -216,7 +216,7 @@ Cechy takie jak TotalQuantity (całkowita liczba produktów), Monetary (wydana k
 * **Dane:** Mamy dane wejściowe (cechy) ORAZ gotowe odpowiedzi (etykiety).
 * **Cel:** Nauczyć model przewidywać te odpowiedzi dla nowych danych.
 * **Analogia:** Uczeń w szkole z nauczycielem. Nauczyciel pokazuje obrazek i mówi: "To jest kot". Uczeń się uczy, żeby potem samemu rozpoznać kota.
-* **W Twoim projekcie:**
+* **W projekcie:**
     * To są Twoje **klasyfikatory** (Drzewo Decyzyjne, Naive Bayes).
     * One "widziały" etykiety (VIP, Standard, Uśpieni), które wcześniej stworzył K-Means, i uczyły się reguł, jak je rozpoznawać.
 
@@ -224,7 +224,7 @@ Cechy takie jak TotalQuantity (całkowita liczba produktów), Monetary (wydana k
 * **Dane:** Mamy tylko surowe dane wejściowe. Nie ma "poprawnych odpowiedzi".
 * **Cel:** Znaleźć ukrytą strukturę, wzorce lub grupy w danych.
 * **Analogia:** Dziecko, które dostało pudełko klocków, ale bez instrukcji. Samo zaczyna układać je w grupy: "te są czerwone", "te są niebieskie", "te są duże".
-* **W Twoim projekcie:**
+* **W projekcie:**
     * To jest Twój algorytm **K-Means** (Segmentacja).
     * Na początku nie wiedziałeś, kto jest VIP-em. Algorytm sam to odkrył, analizując, kto jest podobny do kogo.
     * Do tej grupy należy też **PCA** (redukcja wymiarów), które samo znalazło najważniejsze osie wariancji.
