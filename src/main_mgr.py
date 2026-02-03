@@ -53,11 +53,21 @@ def main():
     
     # 5. Klasyfikacja
     print("\n[5/6] Przygotowanie danych treningowych...")
-    X = features_df
+    
+    # --- POPRAWKA (Fix Data Leakage) ---
+    # features_df zawiera teraz kolumny 'Segment' i 'Segment_DBSCAN', 
+    # ponieważ funkcje segmentacji dodały je do ramki danych.
+    # Musimy je usunąć ze zbioru X, aby model nie uczył się z odpowiedzi.
+    columns_to_drop = ["Segment", "Segment_DBSCAN"]
+    X = features_df.drop(columns=columns_to_drop, errors='ignore')
+    
+    # Y to nasze etykiety (Target)
     y = df_kmeans["Segment"]
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+    # Weryfikacja (opcjonalnie wypisz kolumny, by mieć pewność)
+    print(f"Cechy treningowe: {list(X.columns)}")
     
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)    
     # 6. Modele - TYLKO Random Forest i XGBoost
     print("\n[6/6] Trenowanie modeli (Random Forest & XGBoost)...")
 
