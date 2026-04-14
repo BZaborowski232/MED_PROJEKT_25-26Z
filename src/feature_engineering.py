@@ -37,7 +37,12 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         "Quantity": "sum",                             # Całkowita liczba kupionych sztuk
         "TotalPrice": "sum"                            # Monetary (Suma wydatków)
     })
+
+    # 5. EKSPERYMENT - budowanie reprezentacki klienta jako tekstu do LLM
+    # Cały ten opis potraktowac jako wstep do modelu LLM - przygotowac caly rekord jako tekst w okreslonym ukladzie i dac jako wejście do LLMa
+    # chodzi o wykorzystanie LLma do budowania reprezentacji klienta - można wykorzystać LLAMA - i zrobic klasyfikacje na tej podstawie 
     
+
     features.columns = ["Recency", "Frequency", "UniqueProducts", "TotalQuantity", "Monetary"]
 
     # --- 2. Statystyki wartości transakcji (Min, Max, Avg) ---
