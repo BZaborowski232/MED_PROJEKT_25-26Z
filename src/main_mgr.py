@@ -10,6 +10,8 @@ from feature_engineering import engineer_features
 from segmentation import segment_customers, segment_customers_dbscan, suggest_dbscan_eps
 from evaluation import evaluate_model
 from visualization import visualize_pca
+from visualization import plot_clusters_pca 
+
 
 # --- Importujemy TYLKO nowe klasyfikatory ---
 from classifiers.random_forest import RandomForestModel
@@ -46,11 +48,20 @@ def main():
     df_kmeans, X_scaled = segment_customers(features_df, n_clusters=3)
     visualize_pca(X_scaled, df_kmeans["Segment"], "K-Means Segmentation", "PCA_K-Means_MGR")
 
-    # DBSCAN
+# DBSCAN
     print("   -> DBSCAN...")
     suggest_dbscan_eps(X_scaled, k=4)
     df_dbscan = segment_customers_dbscan(df_kmeans, X_scaled, eps=3.0, min_samples=10)
+
+    # --- NOWY KOD DO WIZUALIZACJI PCA DBSCAN ---
+    print("\nGenerowanie wizualizacji PCA dla DBSCAN...")
     
+    labels_for_pca_dbscan = df_dbscan["Segment_DBSCAN"].apply(
+        lambda x: "Outliers" if x == -1 else "Główny klaster"
+    )
+    
+    plot_clusters_pca(X_scaled, labels_for_pca_dbscan)
+
     # 5. Klasyfikacja
     print("\n[5/6] Przygotowanie danych treningowych...")
     
@@ -67,7 +78,8 @@ def main():
     # Weryfikacja (opcjonalnie wypisz kolumny, by mieć pewność)
     print(f"Cechy treningowe: {list(X.columns)}")
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+        
     # 6. Modele - TYLKO Random Forest i XGBoost
     print("\n[6/6] Trenowanie modeli (Random Forest & XGBoost)...")
 
