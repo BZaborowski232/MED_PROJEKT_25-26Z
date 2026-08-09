@@ -3,15 +3,14 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import os
 
+
 # Importy modułów przetwarzania
 from data_loader import load_data
 from preprocessing import preprocess
 from feature_engineering import engineer_features
 from segmentation import segment_customers, segment_customers_dbscan, suggest_dbscan_eps
 from evaluation import evaluate_model
-from visualization import visualize_pca
-from visualization import plot_clusters_pca 
-
+from visualization import visualize_pca, plot_clusters_pca, plot_confusion_matrix_heatmap
 
 # --- Importujemy TYLKO nowe klasyfikatory ---
 from classifiers.random_forest import RandomForestModel
@@ -80,8 +79,15 @@ def main():
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
         
-    # 6. Modele - TYLKO Random Forest i XGBoost
+# 6. Modele - TYLKO Random Forest i XGBoost
     print("\n[6/6] Trenowanie modeli (Random Forest & XGBoost)...")
+
+    # Mapowanie nazw segmentów dla macierzy konfuzji
+    segment_map = {
+        0: "Uśpieni / Odchodzący",     
+        1: "VIP / Hurt",      
+        2: "Standardowi / Lojalni"          
+    }
 
     models = [
         ("Random Forest", RandomForestModel(n_estimators=100)),
@@ -95,14 +101,21 @@ def main():
         
         evaluate_model(y_test, preds, model_name=name)
         
+        # --- NOWY KOD: Generowanie macierzy konfuzji ---
+        file_name = f"Matrix_{name.replace(' ', '_')}"
+        plot_confusion_matrix_heatmap(
+            y_true=y_test, 
+            y_pred=preds, 
+            labels_map=segment_map, 
+            title=f"Macierz - {name}", 
+            filename=file_name
+        )
+        
         # Wykresy ważności cech
         if name == "Random Forest":
             model.get_feature_importance(X.columns)
         elif name == "XGBoost":
             model.get_feature_importance()
-
-    print("\n=== KONIEC EKSPERYMENTU ===")
-    print("Wyniki w folderze Visualizations/MGR/")
 
 if __name__ == "__main__":
     main()

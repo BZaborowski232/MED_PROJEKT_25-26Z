@@ -152,7 +152,7 @@ def plot_confusion_matrix_heatmap(y_true, y_pred, labels_map=None, title="Macier
         labels = sorted(list(set(y_true) | set(y_pred)))
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=labels, yticklabels=labels)
     plt.title(title)
     plt.ylabel('Prawdziwa klasa')
     plt.xlabel('Przewidziana klasa')
