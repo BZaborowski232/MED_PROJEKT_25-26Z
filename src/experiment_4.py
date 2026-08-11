@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 import xgboost as xgb
 
-# Importy z Twojego projektu
+# Importy modułów
 from data_loader import load_data
 from preprocessing import preprocess
 from feature_engineering import engineer_features
