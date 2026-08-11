@@ -1,6 +1,8 @@
 pandas
 numpy
 scikit-learn
+scikit-learn-extra
 matplotlib
 seaborn
 xgboost
+setuptools
