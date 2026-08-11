@@ -3,12 +3,19 @@ import numpy as np
 import pandas as pd
 from sklearn_extra.cluster import KMedoids
 
-# Importy Twoich modułów
+# Importy modułów
 from data_loader import load_data
 from preprocessing import preprocess
 from feature_engineering import engineer_features
 from segmentation import segment_customers
 from visualization import visualize_pca
+
+
+# PAM Przypisał etykiety klastrów następująco:
+# Segment 0: Standardowi / Lojalni
+# Segment 1: Uśpieni / Odchodzący
+# Segment 2: VIP / HURT
+
 
 def run_experiment_3():
     print("=== EKSPERYMENT E3: Porównanie K-Means vs PAM (K-Medoids) ===")
